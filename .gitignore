@@ -1,0 +1,25 @@
+# Local Python environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.streamlit/
+
+# Data and Secrets
+*.xlsx
+*.xls
+.env
+data_analysis.json
+processed_tenders.json
+temp_info.txt
+tenders_insights.json
+sap_ui_dump.txt
+Session
+analyze_tenders.py
+telegram_kpi_bot.py
