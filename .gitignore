@@ -1,4 +1,4 @@
-# Local Python environment
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -7,19 +7,24 @@ __pycache__/
 env/
 venv/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
 .streamlit/
 
-# Data and Secrets
+# Excel & Data
 *.xlsx
 *.xls
-.env
-data_analysis.json
+tenders_data.json
 processed_tenders.json
 temp_info.txt
 tenders_insights.json
-sap_ui_dump.txt
-Session
+data_analysis.json
+
+# Unrelated project files
 analyze_tenders.py
 telegram_kpi_bot.py
+fix_amd_audio.ps1
+sap_ui_dump.txt
+Session
+saudi-job-portal/
+logs/
+bin/
+obj/
