@@ -74,9 +74,9 @@ def main():
             subprocess.run(['git', 'add', output_file], check=True)
             subprocess.run(['git', 'commit', '-m', f"Data sync {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"], check=True)
             subprocess.run(['git', 'push', 'origin', 'master'], check=True)
-            print("✅ Data synced and deployed live to the dashboard!")
+            print("DONE: Data synced and deployed live to the dashboard!")
     except Exception as e:
-        print(f"⚠️ Git sync skipped: {e}")
+        print(f"ERROR: Git sync skipped: {e}")
 
 if __name__ == "__main__":
     main()

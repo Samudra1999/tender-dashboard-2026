@@ -12,7 +12,7 @@ def get_mtime():
         return 0
 
 def main():
-    print(f"👀 Auto-Updater started. Monitoring:\n{FILE_TO_WATCH}")
+    print(f"Auto-Updater started. Monitoring:\n{FILE_TO_WATCH}")
     print("Keep this window open in the background. Press Ctrl+C to stop.\n")
     
     last_mtime = get_mtime()
@@ -23,18 +23,18 @@ def main():
         
         # If the file's modified time changes, it means it was saved/updated
         if current_mtime != last_mtime:
-            print(f"[{time.strftime('%H:%M:%S')}] 🔄 Change detected in the Excel dataset!")
+            print(f"[{time.strftime('%H:%M:%S')}] Change detected in the Excel dataset!")
             print("Running sync and deploying updates...")
             
             try:
                 # Run your sync script which now auto-pushes to GitHub
                 subprocess.run(['python', 'sync_tenders.py'], check=True)
                 last_mtime = current_mtime # Reset the watch time
-                print("✅ Update successfully pushed to the live dashboard! Resuming watch...\n")
+                print("Update successfully pushed to the live dashboard! Resuming watch...\n")
             except subprocess.CalledProcessError as e:
-                print(f"❌ Error during sync/deployment: {e}\nResuming watch...")
+                print(f"Error during sync/deployment: {e}\nResuming watch...")
             except Exception as e:
-                print(f"❌ Unexpected error: {e}")
+                print(f"Unexpected error: {e}")
 
 if __name__ == "__main__":
     main()
