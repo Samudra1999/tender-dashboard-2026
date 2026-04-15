@@ -252,7 +252,7 @@
   <!-- HEADER -->
   <header class="header animate-in">
     <h1>NexGen Tender Intelligence</h1>
-    <p><span class="live-dot"></span>Automated Procurement Analytics • Live Feed</p>
+    <p><span class="live-dot"></span>Automated Procurement Analytics • <span id="lastSync">Syncing...</span></p>
   </header>
 
   <!-- KPI CARDS -->
@@ -347,16 +347,19 @@
 
 <script>
 // ============== DATA EMBED (will be replaced by build script) ==============
-let TENDERS_DATA = [];
+// Global chart instances to prevent duplicates on refresh
+let charts = {};
 
 async function loadData() {
   try {
-    const resp = await fetch('tenders_data.json');
+    // Add timestamp to query to bypass browser cache
+    const resp = await fetch('tenders_data.json?t=' + Date.now());
     TENDERS_DATA = await resp.json();
-  } catch {
-    // fallback: try inline
-    console.warn('Could not load tenders_data.json — using empty dataset');
+    document.getElementById('lastSync').textContent = 'Last Sync: ' + new Date().toLocaleTimeString();
+  } catch (err) {
+    console.warn('Could not load tenders_data.json', err);
   }
+  
   // Normalize nan values
   TENDERS_DATA.forEach(t => {
     if (t.org === 'nan' || !t.org) t.org = t.branch || 'Unspecified';
@@ -368,6 +371,10 @@ async function loadData() {
   });
   initDashboard();
 }
+
+// Polling: Auto-refresh data every 60 seconds
+setInterval(loadData, 60000);
+
 
 function initDashboard() {
   renderKPIs();
@@ -420,7 +427,8 @@ function renderCharts() {
     }
   });
   const sortedDates = Object.keys(deadlines).sort();
-  new Chart(document.getElementById('chartTimeline'), {
+  if (charts.timeline) charts.timeline.destroy();
+  charts.timeline = new Chart(document.getElementById('chartTimeline'), {
     type: 'bar',
     data: {
       labels: sortedDates.map(d => { const dt = new Date(d); return dt.toLocaleDateString('en-US', {month:'short', day:'numeric'}); }),
@@ -439,6 +447,7 @@ function renderCharts() {
     },
     options: {
       responsive: true, maintainAspectRatio: true, aspectRatio: 2,
+      animation: { duration: charts.timeline ? 0 : 1000 }, // No animation after first load
       plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', titleFont: chartFont, bodyFont: chartFont, borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, cornerRadius: 8, padding: 12 } },
       scales: {
         x: { ticks: { color: tickColor, font: chartFont, maxRotation: 45 }, grid: { display: false } },
@@ -456,7 +465,8 @@ function renderCharts() {
     else if (dl <= 30) lifecycle['Comfortable (16-30d)']++;
     else lifecycle['Long Term (30d+)']++;
   });
-  new Chart(document.getElementById('chartLifecycle'), {
+  if (charts.lifecycle) charts.lifecycle.destroy();
+  charts.lifecycle = new Chart(document.getElementById('chartLifecycle'), {
     type: 'doughnut',
     data: {
       labels: Object.keys(lifecycle),
@@ -470,6 +480,7 @@ function renderCharts() {
     options: {
       responsive: true, maintainAspectRatio: true, aspectRatio: 1.4,
       cutout: '68%',
+      animation: { duration: charts.lifecycle ? 0 : 1000 },
       plugins: {
         legend: { position: 'bottom', labels: { color: '#94a3b8', font: chartFont, padding: 16, usePointStyle: true, pointStyleWidth: 10 } },
         tooltip: { backgroundColor: '#0f172a', titleFont: chartFont, bodyFont: chartFont, borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, cornerRadius: 8, padding: 12 }
@@ -484,7 +495,8 @@ function renderCharts() {
     if (ent !== 'Unspecified') entityCounts[ent] = (entityCounts[ent] || 0) + 1;
   });
   const topEntities = Object.entries(entityCounts).sort((a,b) => b[1] - a[1]).slice(0, 10);
-  new Chart(document.getElementById('chartEntities'), {
+  if (charts.entities) charts.entities.destroy();
+  charts.entities = new Chart(document.getElementById('chartEntities'), {
     type: 'bar',
     data: {
       labels: topEntities.map(e => e[0].length > 40 ? e[0].substring(0, 40) + '…' : e[0]),
@@ -500,6 +512,7 @@ function renderCharts() {
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: true, aspectRatio: 1.6,
+      animation: { duration: charts.entities ? 0 : 1000 },
       plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f172a', bodyFont: chartFont, borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, cornerRadius: 8, padding: 12 } },
       scales: {
         x: { ticks: { color: tickColor, font: chartFont }, grid: { color: gridColor } },
@@ -517,7 +530,8 @@ function renderCharts() {
     else if (c <= 1000) costBrackets['501 – 1000']++;
     else costBrackets['1001+']++;
   });
-  new Chart(document.getElementById('chartCost'), {
+  if (charts.cost) charts.cost.destroy();
+  charts.cost = new Chart(document.getElementById('chartCost'), {
     type: 'polarArea',
     data: {
       labels: Object.keys(costBrackets),
@@ -530,6 +544,7 @@ function renderCharts() {
     },
     options: {
       responsive: true, maintainAspectRatio: true, aspectRatio: 1.4,
+      animation: { duration: charts.cost ? 0 : 1000 },
       scales: { r: { ticks: { color: tickColor, backdropColor: 'transparent', font: chartFont }, grid: { color: gridColor } } },
       plugins: {
         legend: { position: 'bottom', labels: { color: '#94a3b8', font: chartFont, padding: 14, usePointStyle: true } },

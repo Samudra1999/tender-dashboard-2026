@@ -12,7 +12,6 @@ venv/
 # Excel & Data
 *.xlsx
 *.xls
-tenders_data.json
 processed_tenders.json
 temp_info.txt
 tenders_insights.json
